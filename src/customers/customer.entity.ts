@@ -6,32 +6,30 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-}
-
 @Entity()
 @ObjectType()
-export class User {
+export class Customer {
   @PrimaryGeneratedColumn()
+  @Field()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
+  @Field()
+  name: string;
+
+  @Column()
   @Field()
   email: string;
 
   @Column()
   @Field()
-  password: string;
-
-  @Column({ type: 'enum', enum: UserRole, update: false })
-  @Field()
-  role: UserRole;
+  user_id: number;
 
   @CreateDateColumn()
+  @Field()
   created_at: Date;
 
   @CreateDateColumn()
+  @Field()
   updated_at: Date;
 }

@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { UsersModule } from '../src/users/users.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Customer } from '../src/customers/customer.entity';
+import { User } from '../src/users/user.entity';
+import { CustomersModule } from '../src/customers/customers.module';
+import { AppController } from '../src/app.controller';
+import { AppService } from '../src/app.service';
+import { AuthModule } from '../src/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
-import { CustomersModule } from './customers/customers.module';
 
 @Module({
   imports: [
@@ -22,15 +24,16 @@ import { CustomersModule } from './customers/customers.module';
       entities: [join(__dirname + '/**/*.entity{.ts,.js}')],
       autoLoadEntities: true,
     }),
+    TypeOrmModule.forFeature([Customer, User]),
+    CustomersModule,
+    UsersModule,
+    AuthModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
-    UsersModule,
-    AuthModule,
-    CustomersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class TestingModule {}

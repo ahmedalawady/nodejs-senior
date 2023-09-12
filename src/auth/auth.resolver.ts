@@ -4,9 +4,9 @@ import { LoginResponse } from './dto/login-response';
 import { LoginUserInput } from './dto/login-user-input';
 import { BadRequestException, UseGuards } from '@nestjs/common';
 import { SignUpUserInput } from './dto/signup-input';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { User } from 'src/users/users.entity';
+import { User } from '../users/user.entity';
 
 @Resolver()
 export class AuthResolver {
@@ -17,7 +17,7 @@ export class AuthResolver {
 
   @Query(() => User)
   @UseGuards(JwtAuthGuard)
-  me(@Context() context: any) {
+  async me(@Context() context: any) {
     const user = context.req?.user;
     return this.authService.me(user.email);
   }
@@ -31,7 +31,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean)
-  signUp(@Args('signUpUserInput') signUpUserInput: SignUpUserInput) {
+  async signUp(@Args('signUpUserInput') signUpUserInput: SignUpUserInput) {
     return this.authService.signUp(signUpUserInput);
   }
 }
