@@ -1,28 +1,35 @@
 import { Module } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
-import { PrismaService } from './prisma.service';
-import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
-    CustomerModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: +process.env.DB_PORT,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      synchronize: true,
+      entities: [join(__dirname + '/**/*.entity{.ts,.js}')],
+      autoLoadEntities: true,
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      buildSchemaOptions: {
-        dateScalarMode: 'timestamp',
-      },
-      context: ({ request, reply }) => ({ request, reply }),
-      playground: true,
-      introspection: true, // TODO update this so that it's off in production;
+      autoSchemaFile: true,
     }),
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService],
+  // exports: [JwtModule],
 })
 export class AppModule {}
