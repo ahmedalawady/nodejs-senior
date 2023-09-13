@@ -7,6 +7,8 @@ import { UsersService } from '../users/users.service';
 import { UserRole } from '../types';
 import * as bcrypt from 'bcrypt';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { CustomerMapper } from './dto/customer-mapper';
+import { CustomerResponseDto } from './dto/customer-response.dto';
 
 @Injectable()
 export class CustomersService {
@@ -16,7 +18,7 @@ export class CustomersService {
     private readonly usersService: UsersService,
   ) {}
 
-  async create(customer: CreateCustomerDto): Promise<Customer> {
+  async create(customer: CreateCustomerDto): Promise<CustomerResponseDto> {
     const encryptedPassword = await bcrypt.hash(customer.password, 10);
 
     const user = await this.usersService.create({
@@ -30,26 +32,29 @@ export class CustomersService {
       email: customer.email,
       user_id: user.id,
     });
-    return customerData;
+
+    return CustomerMapper.toDTO(customerData);
   }
 
   //TODO handle pagination and filtering
-  async findAll() {
+  async findAll(): Promise<Array<Customer>> {
     const customers = await this.customersRepository.find();
     return customers;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<CustomerResponseDto> {
     const customer = await this.customersRepository.findOne({ where: { id } });
     if (!customer) {
       //TODO throw custom exception
       throw new NotFoundException(`Customer with id ${id} doesn't exists`);
     }
 
-    return customer;
+    return CustomerMapper.toDTO(customer);
   }
 
-  async update(updateCustomerDto: UpdateCustomerDto) {
+  async update(
+    updateCustomerDto: UpdateCustomerDto,
+  ): Promise<CustomerResponseDto> {
     const customer = await this.customersRepository.findOne({
       where: { id: updateCustomerDto.customer_id },
     });
@@ -65,7 +70,8 @@ export class CustomersService {
       ...updateCustomerDto,
     };
 
-    return await this.customersRepository.save(updatedUser);
+    const updatedCustomer = await this.customersRepository.save(updatedUser);
+    return CustomerMapper.toDTO(updatedCustomer);
   }
 
   async delete(id: number): Promise<void> {

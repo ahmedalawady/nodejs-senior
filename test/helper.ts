@@ -11,9 +11,7 @@ export const createUserReturnToken = async (app: any, data: any) => {
       })
     }
   `;
-  
-  console.log(data);
-  
+
   await request(app.getHttpServer()).post('/graphql').send({
     query: signUpMutation,
   });
